@@ -70,7 +70,7 @@ This plugin now supports Capacitor 5 only. Please run `npx cap sync` after updat
 If you want to use this plugin with Capacitor 4, please install version `1.4.0`:
 
 ```
-npm i @capacitor-firebase/messaging@1.4.0
+npm i @healthrecoverysolutions/capacitor-firebase-messaging@1.4.0
 ```
 
 ### Localized error messages
@@ -88,7 +88,7 @@ This plugin now supports Capacitor 4 only. Please run `npx cap sync` after updat
 If you want to use this plugin with Capacitor 3, please install version `0.5.1`:
 
 ```
-npm i @capacitor-firebase/messaging@0.5.1
+npm i @healthrecoverysolutions/capacitor-firebase-messaging@0.5.1
 ```
 
 ### `tokenReceived` event

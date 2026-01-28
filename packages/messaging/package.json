@@ -1,5 +1,5 @@
 {
-  "name": "@capacitor-firebase/messaging",
+  "name": "@healthrecoverysolutions/capacitor-firebase-messaging",
   "version": "8.0.1",
   "description": "Capacitor plugin for Firebase Cloud Messaging (FCM).",
   "main": "dist/plugin.cjs.js",
@@ -14,26 +14,16 @@
     "CapacitorFirebaseMessaging.podspec",
     "Package.swift"
   ],
-  "author": "Robin Genz <mail@robingenz.dev>",
+  "author": "Health Recovery Solutions",
   "license": "Apache-2.0",
-  "homepage": "https://capawesome.io/",
+  "homepage": "https://github.com/healthrecoverysolutions/capacitor-firebase",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/capawesome-team/capacitor-firebase.git"
+    "url": "git+https://github.com/healthrecoverysolutions/capacitor-firebase.git"
   },
   "bugs": {
-    "url": "https://github.com/capawesome-team/capacitor-firebase/issues"
+    "url": "https://github.com/healthrecoverysolutions/capacitor-firebase/issues"
   },
-  "funding": [
-    {
-      "type": "github",
-      "url": "https://github.com/sponsors/capawesome-team/"
-    },
-    {
-      "type": "opencollective",
-      "url": "https://opencollective.com/capawesome"
-    }
-  ],
   "keywords": [
     "capacitor",
     "plugin",
@@ -96,6 +86,7 @@
     }
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "registry": "https://npm.pkg.github.com"
   }
 }

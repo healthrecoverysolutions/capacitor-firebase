@@ -1,16 +1,8 @@
-# @capacitor-firebase/messaging
+# @healthrecoverysolutions/capacitor-firebase-messaging
 
-Unofficial Capacitor plugin for [Firebase Cloud Messaging](https://firebase.google.com/docs/cloud-messaging).[^1]
+Capacitor plugin for [Firebase Cloud Messaging](https://firebase.google.com/docs/cloud-messaging).[^1]
 
-<div class="capawesome-z29o10a">
-  <a href="https://cloud.capawesome.io/" target="_blank">
-    <img alt="Deliver Live Updates to your Capacitor app with Capawesome Cloud" src="https://cloud.capawesome.io/assets/banners/cloud-build-and-deploy-capacitor-apps.png?t=1" />
-  </a>
-</div>
-
-## Guides
-
-- [The Push Notifications Guide for Capacitor](https://capawesome.io/blog/the-push-notifications-guide-for-capacitor/)
+Forked from [@capacitor-firebase/messaging](https://github.com/capawesome-team/capacitor-firebase).
 
 ## Compatibility
 
@@ -22,14 +14,20 @@ Unofficial Capacitor plugin for [Firebase Cloud Messaging](https://firebase.goog
 | 5.x.x          | 5.x.x             | Deprecated     |
 | 1.x.x          | 4.x.x             | Deprecated     |
 
+## Development
+
+For developers and maintainers:
+- [BUILD.md](BUILD.md) - Instructions for building the package from source
+- [PUBLISHING.md](PUBLISHING.md) - Instructions for publishing to GitHub Packages
+
 ## Installation
 
 ```bash
-npm install @capacitor-firebase/messaging firebase
+npm install @healthrecoverysolutions/capacitor-firebase-messaging firebase
 npx cap sync
 ```
 
-Add Firebase to your project if you haven't already ([Android](https://github.com/capawesome-team/capacitor-firebase/blob/main/docs/firebase-setup.md#android) / [iOS](https://github.com/capawesome-team/capacitor-firebase/blob/main/docs/firebase-setup.md#ios) / [Web](https://github.com/capawesome-team/capacitor-firebase/blob/main/docs/firebase-setup.md#web)).
+Add Firebase to your project if you haven't already ([Android](https://github.com/healthrecoverysolutions/capacitor-firebase/blob/main/docs/firebase-setup.md#android) / [iOS](https://github.com/healthrecoverysolutions/capacitor-firebase/blob/main/docs/firebase-setup.md#ios) / [Web](https://github.com/healthrecoverysolutions/capacitor-firebase/blob/main/docs/firebase-setup.md#web)).
 
 ### Android
 
@@ -91,7 +89,7 @@ func application(_ application: UIApplication, didReceiveRemoteNotification user
 }
 ```
 
-**Attention**: If you use this plugin in combination with `@capacitor-firebase/authentication`, then add the following to your app's `AppDelegate.swift`:
+**Attention**: If you use this plugin in combination with `@healthrecoverysolutions/capacitor-firebase-authentication`, then add the following to your app's `AppDelegate.swift`:
 
 ```diff
 + import FirebaseAuth
@@ -143,7 +141,7 @@ In `capacitor.config.json`:
 In `capacitor.config.ts`:
 
 ```ts
-/// <reference types="@capacitor-firebase/messaging" />
+/// <reference types="@healthrecoverysolutions/capacitor-firebase-messaging" />
 
 import { CapacitorConfig } from '@capacitor/cli';
 
@@ -160,20 +158,10 @@ export default config;
 
 </docgen-config>
 
-## Demo
-
-A working example can be found here: [robingenz/capacitor-firebase-plugin-demo](https://github.com/robingenz/capacitor-firebase-plugin-demo)
-
-## Starter templates
-
-The following starter templates are available:
-
-- [Ionstarter Angular Firebase](https://ionstarter.dev/)
-
 ## Usage
 
 ```typescript
-import { FirebaseMessaging } from '@capacitor-firebase/messaging';
+import { FirebaseMessaging } from '@healthrecoverysolutions/capacitor-firebase-messaging';
 
 const checkPermissions = async () => {
   const result = await FirebaseMessaging.checkPermissions();
@@ -784,10 +772,10 @@ Callback to receive the notification action performed event.
 
 ## Changelog
 
-See [CHANGELOG.md](https://github.com/capawesome-team/capacitor-firebase/blob/main/packages/messaging/CHANGELOG.md).
+See [CHANGELOG.md](https://github.com/healthrecoverysolutions/capacitor-firebase/blob/main/packages/messaging/CHANGELOG.md).
 
 ## License
 
-See [LICENSE](https://github.com/capawesome-team/capacitor-firebase/blob/main/packages/messaging/LICENSE).
+See [LICENSE](https://github.com/healthrecoverysolutions/capacitor-firebase/blob/main/packages/messaging/LICENSE).
 
 [^1]: This project is not affiliated with, endorsed by, sponsored by, or approved by Google LLC or any of their affiliates or subsidiaries.
