@@ -28,17 +28,19 @@ public class FirebaseMessaging {
         getFirebaseMessagingInstance().setAutoInitEnabled(true);
         getFirebaseMessagingInstance()
             .getToken()
-            .addOnCompleteListener(task -> {
-                if (!task.isSuccessful()) {
-                    Exception exception = task.getException();
-                    Log.w(FirebaseMessagingPlugin.TAG, "Fetching FCM registration token failed", exception);
-                    resultCallback.error(exception.getMessage());
-                    return;
-                }
+            .addOnCompleteListener(
+                task -> {
+                    if (!task.isSuccessful()) {
+                        Exception exception = task.getException();
+                        Log.w(FirebaseMessagingPlugin.TAG, "Fetching FCM registration token failed", exception);
+                        resultCallback.error(exception.getMessage());
+                        return;
+                    }
 
-                String token = task.getResult();
-                resultCallback.success(token);
-            });
+                    String token = task.getResult();
+                    resultCallback.success(token);
+                }
+            );
     }
 
     public void deleteToken() {
@@ -56,9 +58,8 @@ public class FirebaseMessaging {
     public void removeDeliveredNotifications(List<String> tags, List<String> ids) {
         for (int i = 0; i < tags.size(); i++) {
             try {
-                String tag = tags.get(i);
                 int id = Integer.parseInt(ids.get(i));
-                notificationManager.cancel(tag, id);
+                notificationManager.cancel(id);
             } catch (NumberFormatException exception) {
                 Log.w(FirebaseMessagingPlugin.TAG, "removeDeliveredNotifications failed", exception);
             }

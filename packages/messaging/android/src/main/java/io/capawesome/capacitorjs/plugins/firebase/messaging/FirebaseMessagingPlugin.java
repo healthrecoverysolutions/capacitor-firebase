@@ -2,10 +2,15 @@ package io.capawesome.capacitorjs.plugins.firebase.messaging;
 
 import android.Manifest;
 import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import com.getcapacitor.Bridge;
 import com.getcapacitor.JSArray;
@@ -21,9 +26,16 @@ import com.getcapacitor.annotation.Permission;
 import com.getcapacitor.annotation.PermissionCallback;
 import com.google.firebase.messaging.RemoteMessage;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import io.capawesome.capacitorjs.plugins.firebase.messaging.messages.BackgroundMessageHandler;
+import io.capawesome.capacitorjs.plugins.firebase.messaging.messages.SharedPreferencesManager;
+import timber.log.Timber;
 
 @CapacitorPlugin(
     name = "FirebaseMessaging",
@@ -79,13 +91,29 @@ public class FirebaseMessagingPlugin extends Plugin {
         }
     }
 
-    public static void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
+    public static void onMessageReceived(Context context, @NonNull RemoteMessage remoteMessage) {
         FirebaseMessagingPlugin plugin = FirebaseMessagingPlugin.getFirebaseMessagingPluginInstance();
         if (plugin != null) {
-            plugin.handleNotificationReceived(remoteMessage);
+            boolean isForeground = false;
+            try {
+                isForeground = plugin.getBridge().getActivity().hasWindowFocus();
+            } catch (Exception e) {
+                Timber.e("Failed to get window focus");
+            }
+            if (!isForeground) {
+                handleBackgroundMessage(context, remoteMessage);
+            } else {
+                plugin.handleNotificationReceived(remoteMessage);
+            }
         } else {
-            lastRemoteMessage = remoteMessage;
+            handleBackgroundMessage(context, remoteMessage);
         }
+    }
+
+    private static void handleBackgroundMessage(Context context, RemoteMessage remoteMessage) {
+//        lastRemoteMessage = remoteMessage;
+        Timber.d("handleBackgroundFCMMessage");
+        BackgroundMessageHandler.handle(context, remoteMessage);
     }
 
     @Override
@@ -160,32 +188,46 @@ public class FirebaseMessagingPlugin extends Plugin {
 
     @PluginMethod
     public void getDeliveredNotifications(PluginCall call) {
+        Timber.d("getDeliveredNotifications");
         try {
             JSArray notificationsResult = new JSArray();
-            StatusBarNotification[] activeNotifications = implementation.getDeliveredNotifications();
-            for (StatusBarNotification activeNotification : activeNotifications) {
-                JSObject notificationResult = FirebaseMessagingHelper.createNotificationResult(activeNotification);
-                notificationsResult.put(notificationResult);
+            SharedPreferencesManager sharedPreferencesManager =
+                SharedPreferencesManager.getInstance(getContext());
+            JSONObject activeNotifications = sharedPreferencesManager.getNotifications();
+            if (activeNotifications != null && activeNotifications.length() > 0) {
+                // Iterate over keys of stored JSONObject
+                Iterator<String> keys = activeNotifications.keys();
+                while (keys.hasNext()) {
+                    String key = keys.next();
+                    JSONObject notificationObj = activeNotifications.getJSONObject(key);
+                    JSObject notificationResult =
+                        FirebaseMessagingHelper.createNotificationResult(notificationObj);
+                    notificationsResult.put(notificationResult);
+                }
+                // Clear after reading
+                sharedPreferencesManager.clearNotifications();
             }
 
             JSObject result = new JSObject();
             result.put("notifications", notificationsResult);
             call.resolve(result);
-        } catch (Exception exception) {
-            Logger.error(TAG, exception.getMessage(), exception);
-            call.reject(exception.getMessage());
+
+        } catch (JSONException exception) {
+            Timber.e(exception, "Failure in getDeliveredNotifications");
+            call.reject("Failed to fetch notifications", exception);
         }
+
     }
 
     @PluginMethod
     public void removeDeliveredNotifications(PluginCall call) {
+        Timber.d("removeDeliveredNotifications");
         try {
             JSArray notifications = call.getArray("notifications");
             if (notifications == null) {
                 call.reject(ERROR_NOTIFICATIONS_MISSING);
                 return;
             }
-
             List<String> tags = new ArrayList<>();
             List<String> ids = new ArrayList<>();
             try {
@@ -342,10 +384,20 @@ public class FirebaseMessagingPlugin extends Plugin {
     }
 
     private void handleNotificationActionPerformed(@NonNull Bundle bundle) {
-        JSObject notificationResult = FirebaseMessagingHelper.createNotificationResult(bundle);
+        JSObject notificationResult = FirebaseMessagingHelper.createNotificationResult(bundle, true);
         JSObject result = new JSObject();
         result.put("actionId", "tap");
         result.put("notification", notificationResult);
+
+        // As this notification will also be handled from getDeliveredNotifications, remove this from stored preferences
+        try {
+            JSObject actionPerformedObj = notificationResult.getJSObject("data");
+            String clickedId = actionPerformedObj.getString("id");
+            SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(getContext());
+            sharedPreferencesManager.removeNotification(clickedId);
+        } catch (JSONException e) {
+            Timber.e(e, "Failure handleNotificationActionPerformed");
+        }
         notifyListeners(NOTIFICATION_ACTION_PERFORMED_EVENT, result, true);
     }
 
