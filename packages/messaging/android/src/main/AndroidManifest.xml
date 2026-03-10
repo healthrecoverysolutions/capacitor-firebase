@@ -1,6 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
     <application>
-        <service android:name="io.capawesome.capacitorjs.plugins.firebase.messaging.MessagingService" android:exported="false">
+        <service android:name="io.capawesome.capacitorjs.plugins.firebase.messaging.MessagingService" android:exported="true" android:stopWithTask="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>

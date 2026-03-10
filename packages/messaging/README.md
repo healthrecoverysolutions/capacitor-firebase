@@ -141,7 +141,7 @@ In `capacitor.config.json`:
 In `capacitor.config.ts`:
 
 ```ts
-/// <reference types="@healthrecoverysolutions/capacitor-firebase-messaging" />
+/// <reference types="@capacitor-firebase/messaging" />
 
 import { CapacitorConfig } from '@capacitor/cli';
 
