@@ -28,7 +28,8 @@
     "affected:ios:spm:install": "turbo run ios:spm:install --affected --concurrency=1 --no-cache",
     "changeset": "changeset",
     "release": "npm run build && changeset publish",
-    "release:preview": "pkg-pr-new publish './packages/*'"
+    "release:preview": "pkg-pr-new publish './packages/*'",
+    "postinstall": "patch-package"
   },
   "devDependencies": {
     "@changesets/cli": "2.29.8",
