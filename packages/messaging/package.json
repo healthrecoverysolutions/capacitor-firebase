@@ -1,11 +1,11 @@
 {
-  "name": "@healthrecoverysolutions/capacitor-firebase-messaging",
+  "name": "@capacitor-firebase/messaging",
   "version": "8.0.1",
   "description": "Capacitor plugin for Firebase Cloud Messaging (FCM).",
-  "main": "dist/plugin.cjs.js",
-  "module": "dist/esm/index.js",
-  "types": "dist/esm/index.d.ts",
-  "unpkg": "dist/plugin.js",
+  "main": "packages/messaging/dist/plugin.cjs.js",
+  "module": "packages/messaging/dist/esm/index.js",
+  "types": "packages/messaging/dist/esm/index.d.ts",
+  "unpkg": "packages/messaging/dist/plugin.js",
   "files": [
     "android/src/main/",
     "android/build.gradle",
