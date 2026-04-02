@@ -814,10 +814,6 @@ This script internally performs -> "npm run build && npm pack && npm version pat
 Publishing to https://npm.pkg.github.com with tag latest and public access
 + @healthrecoverysolutions/capacitor-firebase-messaging@x.y.z
 
-## Consume Updated Plugin (in mobile‑patient / monorepo)
-1. Update plugin version in package.json
+## Consume Updated Plugin
+1. Update plugin version in your app's package.json
 2. Clean and rebuild:
-`git clean -xdf`
-`npm install`
-`set cross env (As per your build needs for PCM/PCMT KM etc)`
-`npm run app:sync`
