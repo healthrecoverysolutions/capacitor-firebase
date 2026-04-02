@@ -779,3 +779,45 @@ See [CHANGELOG.md](https://github.com/healthrecoverysolutions/capacitor-firebase
 See [LICENSE](https://github.com/healthrecoverysolutions/capacitor-firebase/blob/main/packages/messaging/LICENSE).
 
 [^1]: This project is not affiliated with, endorsed by, sponsored by, or approved by Google LLC or any of their affiliates or subsidiaries.
+
+<!-- ** Additional instructions to modify and publish healthrecoverysolutions-capacitor-firebase-messaging **-->
+>> #### FIREBASE MESSAGING PLUGIN DEVELOPMENT AND PUBLISH GUIDE >>>
+
+Below guide explains how to develop and test firebase messaging plugin changes locally, and how to publish the plugin once changes are merged.
+
+## Local Development & Testing
+Use these steps to make and validate changes before publishing.
+1. Checkout a feature branch for https://github.com/healthrecoverysolutions/capacitor-firebase.git
+2. Make changes
+3. All Firebase Messaging code lives in: packages/messaging
+4. Build and test locally
+`cd packages/messaging`
+`npm install`
+`npm run build`
+5. Install plugin in mobile-patient for local testing
+`npm install <path to local plugin>`
+`npm run app:sync`
+6. Test changes locally, then create and merge your MR.
+
+## Publish Plugin (After Merge)
+1. Publish should only be done after MR approval and merge.
+2. Navigate to the firebase messaging plugin's packages/messaging folder
+3. Login to GitHub Packages: npm login --registry=https://npm.pkg.github.com
+4. One‑time .npmrc setup
+`@healthrecoverysolutions:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=YOUR_GITHUB_TOKEN`
+Note - Token permissions required: read:packages, write:packages, repo
+5. Publish
+This script internally performs -> "npm run build && npm pack && npm version patch && npm publish"
+`npm run publish:plugin`
+6. Success message confirms the new version is published.
+Publishing to https://npm.pkg.github.com with tag latest and public access
++ @healthrecoverysolutions/capacitor-firebase-messaging@x.y.z
+
+## Consume Updated Plugin (in mobile‑patient / monorepo)
+1. Update plugin version in package.json
+2. Clean and rebuild:
+`git clean -xdf`
+`npm install`
+`set cross env (As per your build needs for PCM/PCMT KM etc)`
+`npm run app:sync`
