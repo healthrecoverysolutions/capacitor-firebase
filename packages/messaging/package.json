@@ -1,6 +1,6 @@
 {
   "name": "@healthrecoverysolutions/capacitor-firebase-messaging",
-  "version": "8.0.4",
+  "version": "8.0.8",
   "description": "Capacitor plugin for Firebase Cloud Messaging (FCM).",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",
@@ -45,7 +45,8 @@
     "watch": "tsc --watch",
     "ios:pod:install": "cd ios && pod install --repo-update && cd ..",
     "ios:spm:install": "cd ios && swift package resolve && cd ..",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "publish:plugin": "npm run build && npm pack && npm version patch && npm publish"
   },
   "devDependencies": {
     "@capacitor/android": "8.0.0",
