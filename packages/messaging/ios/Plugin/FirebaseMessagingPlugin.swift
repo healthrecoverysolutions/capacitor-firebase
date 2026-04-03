@@ -177,9 +177,6 @@ public class FirebaseMessagingPlugin: CAPPlugin, CAPBridgedPlugin {
     }
 
     func handleTokenReceived(token: String?) {
-        guard let token = token else {
-            return
-        }
         var result = JSObject()
         result["token"] = token
         notifyListeners(tokenReceivedEvent, data: result, retainUntilConsumed: true)

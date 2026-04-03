@@ -15,6 +15,6 @@ public class MessagingService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
-        FirebaseMessagingPlugin.onMessageReceived(remoteMessage);
+        FirebaseMessagingPlugin.onMessageReceived(getApplicationContext(), remoteMessage);
     }
 }

@@ -21,6 +21,12 @@ import com.getcapacitor.PluginCall;
 import com.getcapacitor.util.WebColor;
 import com.google.firebase.messaging.RemoteMessage;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import io.capawesome.capacitorjs.plugins.firebase.messaging.messages.MessageUtils;
+import timber.log.Timber;
+
 public class FirebaseMessagingHelper {
 
     public static JSObject createNotificationResult(@NonNull RemoteMessage remoteMessage) {
@@ -49,19 +55,33 @@ public class FirebaseMessagingHelper {
         return notificationResult;
     }
 
-    public static JSObject createNotificationResult(@NonNull Bundle bundle) {
+    public static JSObject createNotificationResult(@NonNull Bundle bundle, boolean wasTapped) {
         JSObject notificationResult = new JSObject();
         JSObject data = new JSObject();
         for (String key : bundle.keySet()) {
-            if (key.equals("google.message_id")) {
-                notificationResult.put("id", "" + bundle.get(key).toString());
+            Object value = bundle.get(key);
+            if (key.equals("google.message_id") && value != null) {
+                notificationResult.put("id", value.toString());
+            } else if (value instanceof Bundle) {
+                try {
+                    JSONObject jsonData = MessageUtils.bundleToJSONObject((Bundle) value);
+                    data.put(key, jsonData);
+                } catch (JSONException e) {
+                    Timber.e("Error converting bundle to JSON: %s", e.getMessage());
+                }
             } else {
-                data.put(key, bundle.get(key));
+                data.put(key, value);
             }
         }
+        if(wasTapped) {
+            data.put("wasTapped", true);
+        }
+
         notificationResult.put("data", data);
         return notificationResult;
     }
+
+
 
     public static JSObject createNotificationResult(@NonNull StatusBarNotification statusBarNotification) {
         JSObject notificationResult = new JSObject();
@@ -81,6 +101,22 @@ public class FirebaseMessagingHelper {
         }
 
         return notificationResult;
+    }
+
+    public static JSObject createNotificationResult(@NonNull JSONObject notification) {
+        JSObject result = new JSObject();
+        String id = notification.optString("id");
+        String title = notification.optString("title");
+        String body = notification.optString("body");
+        String type = notification.optString("type");
+
+        JSONObject data = notification.optJSONObject("data");
+        result.put("id", String.valueOf(MessageUtils.createNotificationId(id)));
+        result.put("title", title);
+        result.put("type", type);
+        result.put("body", body);
+        result.put("data", data);
+        return result;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
