@@ -75,7 +75,10 @@ public class IncomingCallService extends Service {
                                 }
                             }
                         }
-                        startActivity(launchIntent);
+
+                        Bundle launchOptions = new Bundle();
+                        launchOptions.putInt("android.activity.splashScreenStyle", 1);
+                        startActivity(launchIntent, launchOptions);
                     }
 
                     // Broadcast locally if needed (optional, depending on your architecture)
