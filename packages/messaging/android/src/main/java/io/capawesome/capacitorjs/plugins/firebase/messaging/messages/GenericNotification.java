@@ -77,11 +77,14 @@ public class GenericNotification {
         intent.putExtras(bundle);
         intent.putExtra("google.message_id", System.currentTimeMillis());
         intent.putExtra("notificationId", notificationId);
+        Bundle activityOptions = new Bundle();
+        activityOptions.putInt("android.activity.splashScreenStyle", 1); // SPLASH_SCREEN_STYLE_ICON
         return PendingIntent.getActivity(
             context,
             notificationId,
             intent,
-            PendingIntent.FLAG_IMMUTABLE
+            PendingIntent.FLAG_IMMUTABLE,
+            activityOptions
         );
     }
 
