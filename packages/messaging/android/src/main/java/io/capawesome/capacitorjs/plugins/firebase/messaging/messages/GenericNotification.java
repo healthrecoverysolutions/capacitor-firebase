@@ -47,7 +47,6 @@ public class GenericNotification {
             .setContentText(body)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
-            .setFullScreenIntent(pendingIntent, true)
             .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), largeIcon));
 
         notificationManager.notify(notificationId, builder.build());
