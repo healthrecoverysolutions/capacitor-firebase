@@ -63,6 +63,7 @@
     "rimraf": "6.1.2",
     "rollup": "4.53.3",
     "swiftlint": "2.0.0",
+    "turbo": "2.10.2",
     "typescript": "5.9.3"
   },
   "peerDependencies": {
