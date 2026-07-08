@@ -109,6 +109,7 @@ public class FirebaseMessagingHelper {
         String title = notification.optString("title");
         String body = notification.optString("body");
         String type = notification.optString("type");
+        String action = notification.optString("action");
 
         JSONObject data = notification.optJSONObject("data");
         result.put("id", String.valueOf(MessageUtils.createNotificationId(id)));
@@ -116,6 +117,9 @@ public class FirebaseMessagingHelper {
         result.put("type", type);
         result.put("body", body);
         result.put("data", data);
+        if (!action.isEmpty()) {
+            result.put("action", action);
+        }
         return result;
     }
 

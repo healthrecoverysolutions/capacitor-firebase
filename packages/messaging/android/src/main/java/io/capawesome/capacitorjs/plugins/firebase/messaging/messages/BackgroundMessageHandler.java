@@ -40,6 +40,15 @@ public class BackgroundMessageHandler {
         } else if (jsonData.optString("action").equals("call_left")) {
             IncomingCall.callLeft(context);
 //            FCMPlugin.sendPushPayload(data);
+        } else if (jsonData.optString("action").equals("remove_patient") ||
+                   jsonData.optString("action").equals("add_patient")) {
+            // Store silent patient assignment notifications so the JS layer can process them on resume
+            Timber.d("Incoming %s notification. Storing for JS layer retrieval on resume.", jsonData.optString("action"));
+            try {
+                SharedPreferencesManager.getInstance(context).storeNotification(jsonData.getString("id"), jsonData);
+            } catch (JSONException e) {
+                Timber.e("Error storing %s notification in shared preferences: %s", jsonData.optString("action"), e.getMessage());
+            }
         } else if (!jsonData.optString("title").isEmpty()) {
             handleGenericNotification(context, jsonData);
             // Store these to shared preferences to handle multiple other messages when one is tapped
