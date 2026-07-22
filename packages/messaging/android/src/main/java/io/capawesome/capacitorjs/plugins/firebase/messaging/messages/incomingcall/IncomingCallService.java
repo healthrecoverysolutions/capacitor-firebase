@@ -46,6 +46,9 @@ public class IncomingCallService extends Service {
             timeoutHandler.removeCallbacks(timeoutRunnable);
         }
 
+        // Ensure the looping ringtone (OS >=16) is always released when the service is torn down.
+        stopMediaPlayerRingtone();
+
         stopForeground(true);  // remove the notification
     }
 
@@ -92,6 +95,7 @@ public class IncomingCallService extends Service {
                 case Constants.ACTION_CALL_TIMEOUT:
                     Intent callTimeoutIntent = new Intent(Constants.ACTION_CALL_TIMEOUT);
                     LocalBroadcastManager.getInstance(this).sendBroadcast(callTimeoutIntent);
+                    break;
                 case Constants.ACTION_CALL_LEFT:
                     Intent callLeftIntent = new Intent(Constants.ACTION_CALL_LEFT);
                     LocalBroadcastManager.getInstance(this).sendBroadcast(callLeftIntent);

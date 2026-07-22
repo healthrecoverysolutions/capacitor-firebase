@@ -37,7 +37,9 @@ public class BackgroundMessageHandler {
 
         if (jsonData.optString("action").equals("incoming_call")) {
             handleIncomingCall(context, jsonData);
-        } else if (jsonData.optString("action").equals("call_left")) {
+        } else if (isRemoteCallEndAction(jsonData.optString("action"))) {
+            // The remote party ended/cancelled the call before it was answered.
+            // Any of these actions must dismiss the incoming-call notification & ringtone.
             IncomingCall.callLeft(context);
 //            FCMPlugin.sendPushPayload(data);
         } else if (jsonData.optString("action").equals("remove_patient") ||
@@ -69,6 +71,17 @@ public class BackgroundMessageHandler {
         }
 
         Timber.d("Notification Data: %s", jsonData.toString());
+    }
+
+    /**
+     * Returns true when the given FCM action indicates the remote party ended, cancelled,
+     * declined or otherwise terminated a ringing call before it was answered. Any of these
+     * must dismiss the native incoming-call notification and stop the ringtone.
+     */
+    public static boolean isRemoteCallEndAction(String action) {
+        return "call_left".equals(action)
+            || "call_unanswered".equals(action)
+            || "call_declined".equals(action);
     }
 
     private static void handleGenericNotification(Context context, JSONObject jsonData) {
