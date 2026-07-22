@@ -57,6 +57,17 @@ public class BackgroundMessageHandler {
             } catch (JSONException e) {
                 Timber.e("Error storing %s notification in shared preferences: %s", jsonData.optString("action"), e.getMessage());
             }
+        } else if (jsonData.optString("type").equals("updatemodule")) {
+            // Store silent module-update notifications (e.g. metric resets carrying {reset:[...]}) so
+            // the JS layer can process them on resume. These are data-only pushes whose title lives
+            // outside jsonData, so without this branch they fall through to the default case below and
+            // are dropped on a cold launch when no plugin instance exists yet (DEV-25041).
+            Timber.d("Incoming updatemodule notification. Storing for JS layer retrieval on resume.");
+            try {
+                SharedPreferencesManager.getInstance(context).storeNotification(jsonData.getString("id"), jsonData);
+            } catch (JSONException e) {
+                Timber.e("Error storing updatemodule notification in shared preferences: %s", e.getMessage());
+            }
         } else if (!jsonData.optString("title").isEmpty()) {
             handleGenericNotification(context, jsonData);
             // Store these to shared preferences to handle multiple other messages when one is tapped
