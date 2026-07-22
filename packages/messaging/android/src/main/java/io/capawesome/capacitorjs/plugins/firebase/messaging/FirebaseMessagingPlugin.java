@@ -376,7 +376,7 @@ public class FirebaseMessagingPlugin extends Plugin {
         notifyListeners(TOKEN_RECEIVED_EVENT, result, true);
     }
 
-    private void handleNotificationReceived(@NonNull RemoteMessage remoteMessage) {
+    public void handleNotificationReceived(@NonNull RemoteMessage remoteMessage) {
         JSObject notificationResult = FirebaseMessagingHelper.createNotificationResult(remoteMessage);
         JSObject result = new JSObject();
         result.put("notification", notificationResult);
@@ -400,8 +400,7 @@ public class FirebaseMessagingPlugin extends Plugin {
         }
         notifyListeners(NOTIFICATION_ACTION_PERFORMED_EVENT, result, true);
     }
-
-    private static FirebaseMessagingPlugin getFirebaseMessagingPluginInstance() {
+    public static FirebaseMessagingPlugin getFirebaseMessagingPluginInstance() {
         if (staticBridge == null || staticBridge.getWebView() == null) {
             return null;
         }

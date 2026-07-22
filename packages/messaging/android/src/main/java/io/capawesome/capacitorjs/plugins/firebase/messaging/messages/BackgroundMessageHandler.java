@@ -13,6 +13,7 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Objects;
 
+import io.capawesome.capacitorjs.plugins.firebase.messaging.FirebaseMessagingPlugin;
 import io.capawesome.capacitorjs.plugins.firebase.messaging.messages.incomingcall.IncomingCall;
 import timber.log.Timber;
 
@@ -66,8 +67,12 @@ public class BackgroundMessageHandler {
                     Timber.e("Patient deactivated. Error deleting Firebase instance: %s", e.getMessage());
                 }
             }
+        } else {
+            FirebaseMessagingPlugin plugin = FirebaseMessagingPlugin.getFirebaseMessagingPluginInstance();
+            if (plugin != null) {
+                plugin.handleNotificationReceived(remoteMessage);
+            }
         }
-
         Timber.d("Notification Data: %s", jsonData.toString());
     }
 
