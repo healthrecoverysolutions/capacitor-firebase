@@ -35,6 +35,7 @@ import org.json.JSONObject;
 
 import io.capawesome.capacitorjs.plugins.firebase.messaging.messages.BackgroundMessageHandler;
 import io.capawesome.capacitorjs.plugins.firebase.messaging.messages.SharedPreferencesManager;
+import io.capawesome.capacitorjs.plugins.firebase.messaging.messages.incomingcall.IncomingCall;
 import timber.log.Timber;
 
 @CapacitorPlugin(
@@ -103,10 +104,34 @@ public class FirebaseMessagingPlugin extends Plugin {
             if (!isForeground) {
                 handleBackgroundMessage(context, remoteMessage);
             } else {
+                // While the app is in the foreground, messages are normally just forwarded to the
+                // JS layer. However, if the remote party ended/cancelled a ringing call, we must
+                // also tear down the native incoming-call notification & ringtone here, since the
+                // foreground path never reaches BackgroundMessageHandler.
+                if (BackgroundMessageHandler.isRemoteCallEndAction(getMessageAction(remoteMessage))) {
+                    IncomingCall.callLeft(context);
+                }
                 plugin.handleNotificationReceived(remoteMessage);
             }
         } else {
             handleBackgroundMessage(context, remoteMessage);
+        }
+    }
+
+    /**
+     * Extracts the "action" field from an FCM message's stringified {@code jsonData} payload.
+     * Returns an empty string when it cannot be determined.
+     */
+    private static String getMessageAction(RemoteMessage remoteMessage) {
+        try {
+            String jsonData = remoteMessage.getData().get("jsonData");
+            if (jsonData == null) {
+                return "";
+            }
+            return new JSONObject(jsonData).optString("action");
+        } catch (JSONException e) {
+            Timber.e(e, "Failed to parse action from push notification jsonData");
+            return "";
         }
     }
 
