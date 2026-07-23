@@ -59,9 +59,7 @@ public class BackgroundMessageHandler {
             }
         } else if (jsonData.optString("type").equals("updatemodule")) {
             // Store silent module-update notifications (e.g. metric resets carrying {reset:[...]}) so
-            // the JS layer can process them on resume. These are data-only pushes whose title lives
-            // outside jsonData, so without this branch they fall through to the default case below and
-            // are dropped on a cold launch when no plugin instance exists yet (DEV-25041).
+            // the JS layer can process them on resume 
             Timber.d("Incoming updatemodule notification. Storing for JS layer retrieval on resume.");
             try {
                 SharedPreferencesManager.getInstance(context).storeNotification(jsonData.getString("id"), jsonData);
