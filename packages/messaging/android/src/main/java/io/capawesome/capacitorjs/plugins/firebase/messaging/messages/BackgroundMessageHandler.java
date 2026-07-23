@@ -43,6 +43,11 @@ public class BackgroundMessageHandler {
             // Any of these actions must dismiss the incoming-call notification & ringtone.
             IncomingCall.callLeft(context);
 //            FCMPlugin.sendPushPayload(data);
+            try {
+                SharedPreferencesManager.getInstance(context).storeNotification(jsonData.getString("id"), jsonData);
+            } catch (JSONException e) {
+                Timber.e("Error getting storing notification in shared preferences: %s", e.getMessage());
+            }
         } else if (jsonData.optString("action").equals("remove_patient") ||
                    jsonData.optString("action").equals("add_patient")) {
             // Store silent patient assignment notifications so the JS layer can process them on resume
