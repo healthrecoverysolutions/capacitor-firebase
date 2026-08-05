@@ -42,6 +42,10 @@ public class BackgroundMessageHandler {
             // The remote party ended/cancelled the call before it was answered.
             // Any of these actions must dismiss the incoming-call notification & ringtone.
             IncomingCall.callLeft(context);
+            FirebaseMessagingPlugin plugin = FirebaseMessagingPlugin.getFirebaseMessagingPluginInstance();
+            if (plugin != null) {
+                plugin.handleNotificationReceived(remoteMessage);
+            }
 //            FCMPlugin.sendPushPayload(data);
             try {
                 SharedPreferencesManager.getInstance(context).storeNotification(jsonData.getString("id"), jsonData);
