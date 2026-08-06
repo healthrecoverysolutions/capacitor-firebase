@@ -24,6 +24,8 @@ import com.google.firebase.messaging.RemoteMessage;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Iterator;
+
 import io.capawesome.capacitorjs.plugins.firebase.messaging.messages.MessageUtils;
 import timber.log.Timber;
 
@@ -105,25 +107,15 @@ public class FirebaseMessagingHelper {
 
     public static JSObject createNotificationResult(@NonNull JSONObject notification) {
         JSObject result = new JSObject();
+        // Preserve the full stored payload so ALL top-level fields survive the round-trip to JS.
+        Iterator<String> keys = notification.keys();
+        while (keys.hasNext()) {
+            String key = keys.next();
+            result.put(key, notification.opt(key));
+        }
+        // Keep exposing the normalized (numeric) notification id the rest of the plugin expects.
         String id = notification.optString("id");
-        String title = notification.optString("title");
-        String body = notification.optString("body");
-        String type = notification.optString("type");
-        String action = notification.optString("action");
-        String status = notification.optString("status");
-
-        JSONObject data = notification.optJSONObject("data");
         result.put("id", String.valueOf(MessageUtils.createNotificationId(id)));
-        result.put("title", title);
-        result.put("type", type);
-        result.put("body", body);
-        result.put("data", data);
-        if (!status.isEmpty()) {
-            result.put("status", status);
-        }
-        if (!action.isEmpty()) {
-            result.put("action", action);
-        }
         return result;
     }
 
