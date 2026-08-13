@@ -71,8 +71,9 @@ public class IncomingCallActivity extends AppCompatActivity {
             finish();
         });
 
-        LocalBroadcastManager.getInstance(this).registerReceiver(
-            callActionReceiver, new IntentFilter(Constants.ACTION_CALL_LEFT));
+        IntentFilter callActionFilter = new IntentFilter(Constants.ACTION_CALL_LEFT);
+        callActionFilter.addAction(Constants.ACTION_CALL_TIMEOUT);
+        LocalBroadcastManager.getInstance(this).registerReceiver(callActionReceiver, callActionFilter);
 
     }
 
