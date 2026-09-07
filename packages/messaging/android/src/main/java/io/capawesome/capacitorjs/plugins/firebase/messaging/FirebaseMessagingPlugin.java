@@ -417,9 +417,11 @@ public class FirebaseMessagingPlugin extends Plugin {
         // As this notification will also be handled from getDeliveredNotifications, remove this from stored preferences
         try {
             JSObject actionPerformedObj = notificationResult.getJSObject("data");
-            String clickedId = actionPerformedObj.getString("id");
-            SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(getContext());
-            sharedPreferencesManager.removeNotification(clickedId);
+            String clickedId = actionPerformedObj == null ? null : actionPerformedObj.getString("id");
+            if (clickedId != null) {
+                SharedPreferencesManager sharedPreferencesManager = SharedPreferencesManager.getInstance(getContext());
+                sharedPreferencesManager.removeNotification(clickedId);
+            }
         } catch (JSONException e) {
             Timber.e(e, "Failure handleNotificationActionPerformed");
         }
