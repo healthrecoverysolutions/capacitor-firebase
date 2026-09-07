@@ -73,6 +73,9 @@ public class MessageUtils {
      * @return int
      */
     public static int createNotificationId(String id) {
+        if (id == null) {
+            return 0;
+        }
         return Math.abs(id.hashCode());
     }
 
