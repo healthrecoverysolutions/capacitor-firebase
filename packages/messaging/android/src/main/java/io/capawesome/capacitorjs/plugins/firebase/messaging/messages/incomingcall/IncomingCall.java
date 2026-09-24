@@ -19,4 +19,14 @@ public class IncomingCall {
         callLeftIntent.setAction(Constants.ACTION_CALL_LEFT);
         context.startService(callLeftIntent);
     }
+
+    /**
+     * Tears down the native ringing UI - ringtone, notification and full-screen activity - once
+     * the app has taken the call over and is showing its own ringing screen.
+     */
+    public static void handOff(Context context) {
+        Intent handOffIntent = new Intent(context, IncomingCallService.class);
+        handOffIntent.setAction(Constants.ACTION_CALL_HANDED_OFF);
+        context.startService(handOffIntent);
+    }
 }

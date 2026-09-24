@@ -20,7 +20,8 @@ public class IncomingCallActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (Constants.ACTION_CALL_LEFT.equals(intent.getAction()) ||
-                Constants.ACTION_CALL_TIMEOUT.equals(intent.getAction())
+                Constants.ACTION_CALL_TIMEOUT.equals(intent.getAction()) ||
+                Constants.ACTION_CALL_HANDED_OFF.equals(intent.getAction())
             ) {
                 restoreSystemUi();
                 finish();
@@ -56,6 +57,9 @@ public class IncomingCallActivity extends AppCompatActivity {
 
         int answerButtonId = getResources().getIdentifier("answer_button", "id", getPackageName());
         findViewById(answerButtonId).setOnClickListener(v -> {
+            // Forget the ringing call before finishing: the app's activity may resume the moment
+            // this one goes, before the service has seen the answer, and must not take it over.
+            IncomingCallService.takeActiveCall();
             action = Constants.ACTION_ANSWER_CALL;
             restoreSystemUi();
             finish();
@@ -63,6 +67,7 @@ public class IncomingCallActivity extends AppCompatActivity {
 
         int declineButtonId = getResources().getIdentifier("decline_button", "id", getPackageName());
         findViewById(declineButtonId).setOnClickListener(v -> {
+            IncomingCallService.takeActiveCall(); // same reason as Answer above
             Intent intent = new Intent(this, IncomingCallService.class);
             intent.setAction(Constants.ACTION_DECLINE_CALL);
             intent.putExtras(extras);
@@ -73,6 +78,7 @@ public class IncomingCallActivity extends AppCompatActivity {
 
         IntentFilter callActionFilter = new IntentFilter(Constants.ACTION_CALL_LEFT);
         callActionFilter.addAction(Constants.ACTION_CALL_TIMEOUT);
+        callActionFilter.addAction(Constants.ACTION_CALL_HANDED_OFF);
         LocalBroadcastManager.getInstance(this).registerReceiver(callActionReceiver, callActionFilter);
 
     }
