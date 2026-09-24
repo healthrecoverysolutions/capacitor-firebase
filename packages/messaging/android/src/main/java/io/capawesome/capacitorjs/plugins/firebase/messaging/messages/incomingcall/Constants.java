@@ -9,4 +9,8 @@ public class Constants {
     public static final String ACTION_DECLINE_CALL = "com.hrs.incomingcall.ACTION_DECLINE_CALL";
     public static final String ACTION_CALL_LEFT = "com.hrs.incomingcall.ACTION_CALL_LEFT";
     public static final String ACTION_CALL_TIMEOUT = "com.hrs.incomingcall.ACTION_CALL_TIMEOUT";
+    // Notification body tapped: open the app on its ringing screen without answering.
+    public static final String ACTION_OPEN_CALL = "com.hrs.incomingcall.ACTION_OPEN_CALL";
+    // The app came to the front while the call was ringing and took it over.
+    public static final String ACTION_CALL_HANDED_OFF = "com.hrs.incomingcall.ACTION_CALL_HANDED_OFF";
 }

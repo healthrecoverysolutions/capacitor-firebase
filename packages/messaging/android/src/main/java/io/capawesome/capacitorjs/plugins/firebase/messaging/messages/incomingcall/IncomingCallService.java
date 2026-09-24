@@ -31,6 +31,23 @@ public class IncomingCallService extends Service {
     private Runnable timeoutRunnable;
     private MediaPlayer player;
 
+    // Data of the call that is ringing right now, or null. Lets the plugin hand the call to the
+    // app when the user opens it from the launcher instead of acting on the notification. It is
+    // cleared the moment any action on the call is handled - not in onDestroy - so the resume
+    // caused by that same action (e.g. Answer launching the app) cannot deliver it a second time.
+    private static Bundle activeCallData;
+
+    /** Returns the ringing call's data and forgets it, so it can only be handed over once. */
+    public static synchronized Bundle takeActiveCall() {
+        Bundle data = activeCallData;
+        activeCallData = null;
+        return data;
+    }
+
+    private static synchronized void setActiveCall(Bundle data) {
+        activeCallData = data;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -49,6 +66,9 @@ public class IncomingCallService extends Service {
         // Ensure the looping ringtone (OS >=16) is always released when the service is torn down.
         stopMediaPlayerRingtone();
 
+        // Backstop for a service stopped without going through onStartCommand's action branch.
+        takeActiveCall();
+
         stopForeground(true);  // remove the notification
     }
 
@@ -57,16 +77,19 @@ public class IncomingCallService extends Service {
         if (intent != null && intent.getAction() != null) {
             String action = intent.getAction();
             Bundle extras = intent.getExtras();
+            takeActiveCall(); // any action ends the ringing state - see activeCallData
             if (isAndroidOS16OrMore()) { // For OS >=16, stop ringtone via player
                 stopMediaPlayerRingtone();
             }
             switch (action) {
                 case Constants.ACTION_ANSWER_CALL:
-                    // Launch the app
+                case Constants.ACTION_OPEN_CALL:
+                    // Launch the app. The action rides along on the launch intent so the plugin can
+                    // tell Accept (answer the call) from a tap on the body (just show it).
                     Intent launchIntent = getPackageManager().getLaunchIntentForPackage(getPackageName());
                     if (launchIntent != null) {
                         launchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                        launchIntent.setAction(Constants.ACTION_ANSWER_CALL);
+                        launchIntent.setAction(action);
                         if (extras != null) {
                             // The extras here come from the intent that started the service.
                             // We need to extract the original data bundle if it exists.
@@ -85,7 +108,7 @@ public class IncomingCallService extends Service {
                     }
 
                     // Broadcast locally if needed (optional, depending on your architecture)
-                    Intent answerBroadcast = new Intent(Constants.ACTION_ANSWER_CALL);
+                    Intent answerBroadcast = new Intent(action);
                     if (extras != null) answerBroadcast.putExtras(extras);
                     LocalBroadcastManager.getInstance(this).sendBroadcast(answerBroadcast);
 
@@ -100,11 +123,18 @@ public class IncomingCallService extends Service {
                     Intent callLeftIntent = new Intent(Constants.ACTION_CALL_LEFT);
                     LocalBroadcastManager.getInstance(this).sendBroadcast(callLeftIntent);
                     break;
+                case Constants.ACTION_CALL_HANDED_OFF:
+                    // Close the full-screen call UI if it is up; the notification and ringtone go
+                    // with this service below.
+                    Intent handedOffIntent = new Intent(Constants.ACTION_CALL_HANDED_OFF);
+                    LocalBroadcastManager.getInstance(this).sendBroadcast(handedOffIntent);
+                    break;
             }
 
             stopForeground(true);
             stopSelf();
         } else if (intent != null) {
+            setActiveCall(intent.getBundleExtra(Constants.EXTRA_CALL_DATA));
             showIncomingCallNotification(intent);
             if (isAndroidOS16OrMore()) {
                 playMediaPlayerRingtone(); // OS 16 is not playing the notification call type sound in a loop thus playing it via media player
@@ -120,6 +150,7 @@ public class IncomingCallService extends Service {
         Bundle extras = intent.getExtras();
         PendingIntent fullScreenIntent = getFullScreenIntent(extras);
         PendingIntent answerIntent = getAnswerIntent(intent);
+        PendingIntent openIntent = getOpenIntent(intent);
         PendingIntent declineIntent = getDeclineIntent(extras);
 
 
@@ -139,7 +170,7 @@ public class IncomingCallService extends Service {
                 .setFullScreenIntent(fullScreenIntent, true)
                 .setStyle(Notification.CallStyle.forIncomingCall(caller, declineIntent, answerIntent))
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
-                .setContentIntent(answerIntent)
+                .setContentIntent(openIntent)
                 .build();
         } else {
             ApplicationInfo appInfo;
@@ -153,7 +184,7 @@ public class IncomingCallService extends Service {
 
             notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle(callTitle != null ? callTitle : "Incoming Call")
-                .setContentText(callerName != null ? callerName : "Tap to answer")
+                .setContentText(callerName != null ? callerName : "Tap to view")
                 .addAction(android.R.drawable.ic_menu_call, "Answer", answerIntent)
                 .addAction(android.R.drawable.ic_menu_close_clear_cancel, "Decline", declineIntent)
                 .setSmallIcon(android.R.drawable.sym_call_incoming)
@@ -163,7 +194,7 @@ public class IncomingCallService extends Service {
                 .setFullScreenIntent(fullScreenIntent, true)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setOngoing(true)
-                .setContentIntent(answerIntent)
+                .setContentIntent(openIntent)
                 .build();
         }
 
@@ -216,6 +247,21 @@ public class IncomingCallService extends Service {
             this,
             0,
             answerIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+    }
+
+    private PendingIntent getOpenIntent(Intent intent) {
+        Intent openIntent = new Intent(this, IncomingCallService.class);
+        openIntent.setAction(Constants.ACTION_OPEN_CALL);
+        if (intent.getExtras() != null) {
+            openIntent.putExtras(intent.getExtras());
+        }
+
+        return PendingIntent.getService(
+            this,
+            0,
+            openIntent,
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
     }

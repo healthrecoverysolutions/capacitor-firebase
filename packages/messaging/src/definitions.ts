@@ -481,6 +481,10 @@ export interface NotificationActionPerformedEvent {
   /**
    * The action performed on the notification.
    *
+   * On Android, the incoming-call notification reports `answer` for its Accept button, `tap` for
+   * its body, and `open` when the app is brought to the front while the call is still ringing.
+   * Every other notification reports `tap`.
+   *
    * @since 0.2.2
    */
   actionId: string;

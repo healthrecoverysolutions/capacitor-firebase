@@ -35,7 +35,9 @@ import org.json.JSONObject;
 
 import io.capawesome.capacitorjs.plugins.firebase.messaging.messages.BackgroundMessageHandler;
 import io.capawesome.capacitorjs.plugins.firebase.messaging.messages.SharedPreferencesManager;
+import io.capawesome.capacitorjs.plugins.firebase.messaging.messages.incomingcall.Constants;
 import io.capawesome.capacitorjs.plugins.firebase.messaging.messages.incomingcall.IncomingCall;
+import io.capawesome.capacitorjs.plugins.firebase.messaging.messages.incomingcall.IncomingCallService;
 import timber.log.Timber;
 
 @CapacitorPlugin(
@@ -79,8 +81,32 @@ public class FirebaseMessagingPlugin extends Plugin {
         super.handleOnNewIntent(data);
         Bundle bundle = data.getExtras();
         if (bundle != null && bundle.containsKey("google.message_id")) {
-            this.handleNotificationActionPerformed(bundle);
+            // The incoming-call notification relaunches the app with ACTION_ANSWER_CALL from its
+            // Accept button. Anything else - including a tap on that notification's body - is a tap.
+            String actionId = Constants.ACTION_ANSWER_CALL.equals(data.getAction()) ? "answer" : "tap";
+            this.handleNotificationActionPerformed(bundle, actionId);
         }
+    }
+
+    /**
+     * The app came to the front while a call was still ringing - typically opened from the
+     * launcher rather than through the notification. Hand the call over: the app shows its own
+     * ringing screen, so the native ringtone, notification and full-screen UI are torn down.
+     * Delivered as a retained 'open' action so a cold start still receives it once JS listens.
+     */
+    @Override
+    protected void handleOnResume() {
+        super.handleOnResume();
+        Bundle ringingCall = IncomingCallService.takeActiveCall();
+        if (ringingCall == null) {
+            return;
+        }
+        Bundle payload = new Bundle(ringingCall);
+        if (!payload.containsKey("google.message_id")) {
+            payload.putString("google.message_id", payload.getString("id"));
+        }
+        IncomingCall.handOff(getContext());
+        handleNotificationActionPerformed(payload, "open");
     }
 
     public static void onNewToken(@NonNull String token) {
@@ -408,10 +434,10 @@ public class FirebaseMessagingPlugin extends Plugin {
         notifyListeners(NOTIFICATION_RECEIVED_EVENT, result, true);
     }
 
-    private void handleNotificationActionPerformed(@NonNull Bundle bundle) {
+    private void handleNotificationActionPerformed(@NonNull Bundle bundle, @NonNull String actionId) {
         JSObject notificationResult = FirebaseMessagingHelper.createNotificationResult(bundle, true);
         JSObject result = new JSObject();
-        result.put("actionId", "tap");
+        result.put("actionId", actionId);
         result.put("notification", notificationResult);
 
         // As this notification will also be handled from getDeliveredNotifications, remove this from stored preferences

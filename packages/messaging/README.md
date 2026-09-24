@@ -705,11 +705,11 @@ Remove all listeners for this plugin.
 
 #### NotificationActionPerformedEvent
 
-| Prop               | Type                                                  | Description                                                      | Since |
-| ------------------ | ----------------------------------------------------- | ---------------------------------------------------------------- | ----- |
-| **`actionId`**     | <code>string</code>                                   | The action performed on the notification.                        | 0.2.2 |
-| **`inputValue`**   | <code>string</code>                                   | Text entered on the notification action. Only available for iOS. | 0.2.2 |
-| **`notification`** | <code><a href="#notification">Notification</a></code> | The notification in which the action was performed.              | 0.2.2 |
+| Prop               | Type                                                  | Description                                                                                                                                                                                                                                                               | Since |
+| ------------------ | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| **`actionId`**     | <code>string</code>                                   | The action performed on the notification. On Android, the incoming-call notification reports `answer` for its Accept button, `tap` for its body, and `open` when the app is brought to the front while the call is still ringing. Every other notification reports `tap`. | 0.2.2 |
+| **`inputValue`**   | <code>string</code>                                   | Text entered on the notification action. Only available for iOS.                                                                                                                                                                                                          | 0.2.2 |
+| **`notification`** | <code><a href="#notification">Notification</a></code> | The notification in which the action was performed.                                                                                                                                                                                                                       | 0.2.2 |
 
 
 ### Type Aliases
