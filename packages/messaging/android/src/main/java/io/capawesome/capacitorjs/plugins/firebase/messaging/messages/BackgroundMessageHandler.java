@@ -36,9 +36,10 @@ public class BackgroundMessageHandler {
             return;
         }
 
-        if (jsonData.optString("action").equals("incoming_call")) {
+        String action = jsonData.optString("action");
+        if (action.equals("incoming_call") || isIncomingVoiceInvite(jsonData)) {
             handleIncomingCall(context, jsonData);
-        } else if (isRemoteCallEndAction(jsonData.optString("action"))) {
+        } else if (isRemoteCallEndAction(action)) {
             // The remote party ended/cancelled the call before it was answered.
             // Any of these actions must dismiss the incoming-call notification & ringtone.
             IncomingCall.callLeft(context);
@@ -96,6 +97,27 @@ public class BackgroundMessageHandler {
         return "call_left".equals(action)
             || "call_unanswered".equals(action)
             || "call_declined".equals(action);
+    }
+
+    /**
+     * Returns true when this push is an incoming voice call invite.
+     *
+     * Voice is the one incoming call that carries no "action" field, so it cannot be recognised
+     * the way video is (which sends action "incoming_call"). It is identified by elimination
+     * instead - any voicecall push that is not one of the call-end actions is an invite - which is
+     * exactly how handleNotification() in firebase.ts identifies it on the TypeScript side.
+     *
+     * Without this, voice invites fall through to the generic-notification / JS branches below, so
+     * the patient gets no Answer/Decline notification while the app is backgrounded or while the
+     * AliveCor EKG recording screen is in front. handleIncomingCall() has always had a
+     * "voice"/"voicecall" branch ready for them.
+     */
+    private static boolean isIncomingVoiceInvite(JSONObject jsonData) {
+        String type = jsonData.optString("type");
+        if (!"voice".equals(type) && !"voicecall".equals(type)) {
+            return false;
+        }
+        return !isRemoteCallEndAction(jsonData.optString("action"));
     }
 
     private static void handleGenericNotification(Context context, JSONObject jsonData) {
